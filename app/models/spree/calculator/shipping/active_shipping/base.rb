@@ -69,6 +69,12 @@ module Spree
         end
 
         protected
+
+        def unit_multiplier
+          multiplier = Spree::ActiveShipping::Config[:unit_multiplier].to_f
+          multiplier.zero? ? 1.0 : multiplier.abs
+        end
+
         # weight limit in ounces or zero (if there is no limit)
         def max_weight_for_country(country)
           0
@@ -155,7 +161,7 @@ module Spree
         end
 
         def convert_package_to_weights_array(package)
-          multiplier = Spree::ActiveShipping::Config[:unit_multiplier]
+          multiplier = unit_multiplier
           default_weight = Spree::ActiveShipping::Config[:default_weight]
           max_weight = get_max_weight(package)
 
@@ -192,7 +198,7 @@ module Spree
         end
 
         def convert_package_to_item_packages_array(package)
-          multiplier = Spree::ActiveShipping::Config[:unit_multiplier]
+          multiplier = unit_multiplier
           max_weight = get_max_weight(package)
           packages = []
 
@@ -248,7 +254,7 @@ module Spree
         def get_max_weight(package)
           order = package.order
           max_weight = max_weight_for_country(order.ship_address.country)
-          max_weight_per_package = Spree::ActiveShipping::Config[:max_weight_per_package] * Spree::ActiveShipping::Config[:unit_multiplier]
+          max_weight_per_package = Spree::ActiveShipping::Config[:max_weight_per_package] * unit_multiplier
           if max_weight == 0 and max_weight_per_package > 0
             max_weight = max_weight_per_package
           elsif max_weight > 0 and max_weight_per_package < max_weight and max_weight_per_package > 0
